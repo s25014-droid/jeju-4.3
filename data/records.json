@@ -1,19 +1,5 @@
 [
   {
-    "id": "rec_20261113071612",
-    "title": "예시 보도 자료",
-    "category": "문서/사료",
-    "location": "제주시 월평동",
-    "year": "1948",
-    "author": "월평동 4·3 조사팀",
-    "source": "호로로로로",
-    "summary": "ㅇㅇ",
-    "content": "ㄹㅇㄹㅇ",
-    "image_url": "https://raw.githubusercontent.com/s25014-droid/jeju-4.3/main/images/20261113_071611_001.png",
-    "published": true,
-    "created_at": "2026-11-13"
-  },
-  {
     "id": "rec_001",
     "title": "1948년 11월 월평마을 소개령과 잃어버린 웃동네 터 조사",
     "category": "문서/사료",
