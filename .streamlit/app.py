@@ -19,7 +19,7 @@ COLOR_ACCENT_RED = "#D94848"     # 동백꽃 포인트 레드 색상
 COLOR_BG_IVORY = "#FBF9F5"       # 배경 웜 아이보리 색상
 
 # ==============================================================================
-# 1. 페이지 기본 설정 및 커스텀 CSS (하단 배지 숨김 + 모바일 최적화)
+# 1. 페이지 기본 설정 및 커스텀 CSS (하단 배지 강제 숨김 + 모바일 최적화)
 # ==============================================================================
 st.set_page_config(
     page_title=SITE_TITLE,
@@ -30,21 +30,22 @@ st.set_page_config(
 
 st.markdown(f"""
 <style>
-    /* 1. 스트림릿 기본 상단 바, 우측 메뉴, 하단 제작자/Hosted with Streamlit 배지 완전 숨김 */
-    header[data-testid="stHeader"] {{
+    /* 1. 스트림릿 기본 상단 바, 우측 메뉴, 하단 제작자/Hosted with Streamlit 배지 강제 제거 */
+    header[data-testid="stHeader"],
+    footer,
+    #MainMenu,
+    div[class*="viewerBadge"],
+    div[class*="StatusWidget"],
+    div[data-testid="stToolbar"],
+    div[data-testid="stDecoration"],
+    div[data-testid="stStatusWidget"],
+    a[href*="streamlit.io"] {{
         display: none !important;
-    }}
-    footer {{
-        display: none !important;
-    }}
-    #MainMenu {{
         visibility: hidden !important;
-    }}
-    div[class*="viewerBadge_container"] {{
-        display: none !important;
-    }}
-    div[data-testid="stStatusWidget"] {{
-        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        position: fixed !important;
+        bottom: -9999px !important;
     }}
 
     /* 2. 전체 배경 및 여백 최적화 */
