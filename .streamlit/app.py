@@ -8,7 +8,7 @@ import requests
 from datetime import datetime
 
 # ==============================================================================
-# 🎨 [UI 및 기본 설정 영역] - 나중에 디자인이나 문구를 바꾸고 싶을 때 여기만 수정하세요!
+# 🎨 [UI 및 기본 설정 영역] - 디자인이나 문구를 바꾸고 싶을 때 여기만 수정하세요!
 # ==============================================================================
 SITE_TITLE = "제주시 월평동 4·3 기억 아카이브"
 SITE_SUBTITLE = "제주 4·3 당시 월평마을의 잃어버린 터와 주민들의 기억을 기록하고 보존하는 공간입니다."
@@ -19,7 +19,7 @@ COLOR_ACCENT_RED = "#D94848"     # 동백꽃 포인트 레드 색상
 COLOR_BG_IVORY = "#FBF9F5"       # 배경 웜 아이보리 색상
 
 # ==============================================================================
-# 1. 페이지 기본 설정 및 커스텀 CSS 적용
+# 1. 페이지 기본 설정 및 커스텀 CSS (하단 배지 숨김 + 모바일 최적화)
 # ==============================================================================
 st.set_page_config(
     page_title=SITE_TITLE,
@@ -30,17 +30,42 @@ st.set_page_config(
 
 st.markdown(f"""
 <style>
-    /* 전체 배경 및 폰트 여백 다듬기 */
+    /* 1. 스트림릿 기본 상단 바, 우측 메뉴, 하단 제작자/Hosted with Streamlit 배지 완전 숨김 */
+    header[data-testid="stHeader"] {{
+        display: none !important;
+    }}
+    footer {{
+        display: none !important;
+    }}
+    #MainMenu {{
+        visibility: hidden !important;
+    }}
+    div[class*="viewerBadge_container"] {{
+        display: none !important;
+    }}
+    div[data-testid="stStatusWidget"] {{
+        display: none !important;
+    }}
+
+    /* 2. 전체 배경 및 여백 최적화 */
     .stApp {{
         background-color: {COLOR_BG_IVORY};
     }}
-    /* 상단 히어로 배너 스타일 */
+    .block-container {{
+        padding-top: 1.2rem !important;
+        padding-bottom: 2rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        max-width: 1100px;
+    }}
+
+    /* 3. 상단 히어로 배너 */
     .hero-banner {{
         background: linear-gradient(135deg, {COLOR_PRIMARY_NAVY} 0%, #243B55 100%);
-        padding: 2.5rem 2rem;
+        padding: 2.2rem 1.8rem;
         border-radius: 16px;
         color: white;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.2rem;
         box-shadow: 0 10px 25px rgba(20, 30, 48, 0.15);
     }}
     .hero-badge {{
@@ -55,24 +80,54 @@ st.markdown(f"""
         margin-bottom: 0.8rem;
     }}
     .hero-title {{
-        font-size: 2.1rem;
+        font-size: 2rem;
         font-weight: 800;
         margin: 0 0 0.5rem 0;
         letter-spacing: -0.5px;
+        word-break: keep-all;
     }}
     .hero-desc {{
-        font-size: 1.05rem;
+        font-size: 1rem;
         color: #CBD5E1;
         margin: 0;
+        line-height: 1.5;
+        word-break: keep-all;
     }}
-    /* 자료 카드 디자인 */
+
+    /* 4. 상단 통계 요약 박스 (PC 4칸 / 모바일 2x2 격자 자동 전환) */
+    .stat-grid {{
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 1rem;
+    }}
+    .stat-box {{
+        background: white;
+        border: 1px solid #E5E0D8;
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+    }}
+    .stat-label {{
+        font-size: 0.82rem;
+        color: #64748B;
+        margin-bottom: 4px;
+    }}
+    .stat-val {{
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: {COLOR_PRIMARY_NAVY};
+    }}
+
+    /* 5. 자료 카드 디자인 */
     .archive-card {{
         background-color: white;
         border: 1px solid #E5E0D8;
         border-radius: 12px;
-        padding: 1.4rem;
-        margin-bottom: 1rem;
+        padding: 1.2rem;
+        margin-bottom: 0.9rem;
         box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        word-break: keep-all;
     }}
     .cat-badge {{
         background-color: #F1F5F9;
@@ -84,8 +139,49 @@ st.markdown(f"""
     }}
     .meta-text {{
         color: #64748B;
-        font-size: 0.85rem;
+        font-size: 0.82rem;
         margin-top: 0.5rem;
+        line-height: 1.4;
+    }}
+
+    /* 6. 휴대폰(모바일) 화면 전용 크기 자동 축소 */
+    @media (max-width: 768px) {{
+        .block-container {{
+            padding-top: 0.8rem !important;
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+        }}
+        .hero-banner {{
+            padding: 1.4rem 1.1rem;
+            border-radius: 12px;
+        }}
+        .hero-badge {{
+            font-size: 0.75rem;
+            padding: 3px 9px;
+        }}
+        .hero-title {{
+            font-size: 1.45rem !important;
+            line-height: 1.3;
+        }}
+        .hero-desc {{
+            font-size: 0.88rem !important;
+        }}
+        .stat-grid {{
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }}
+        .stat-box {{
+            padding: 0.75rem;
+        }}
+        .stat-val {{
+            font-size: 1.05rem;
+        }}
+        .archive-card {{
+            padding: 1rem;
+        }}
+        button[data-baseweb="tab"] p {{
+            font-size: 0.85rem !important;
+        }}
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -93,7 +189,6 @@ st.markdown(f"""
 # ==============================================================================
 # 2. 깃허브(GitHub) 연동 데이터 영구 저장 및 불러오기 함수
 # ==============================================================================
-# 기본 샘플 데이터 (깃허브에 아직 데이터가 없을 때 자동으로 보여줄 초기 기록)
 DEFAULT_RECORDS = [
     {
         "id": "rec_001",
@@ -143,7 +238,6 @@ def github_api_available():
     return all(k in st.secrets for k in ["GITHUB_TOKEN", "GITHUB_REPO"])
 
 def load_records():
-    """깃허브 저장소의 data/records.json에서 데이터를 불러옵니다."""
     if not github_api_available():
         if "local_records" not in st.session_state:
             st.session_state.local_records = DEFAULT_RECORDS.copy()
@@ -162,7 +256,6 @@ def load_records():
         return DEFAULT_RECORDS.copy()
 
 def save_records(records, commit_msg="Update archive records"):
-    """수정된 데이터 목록을 깃허브 저장소 data/records.json에 영구 저장합니다."""
     if not github_api_available():
         st.session_state.local_records = records
         return True
@@ -172,7 +265,6 @@ def save_records(records, commit_msg="Update archive records"):
     url = f"https://api.github.com/repos/{repo}/contents/data/records.json"
     headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
 
-    # 기존 파일 SHA 확인
     get_res = requests.get(url, headers=headers)
     sha = get_res.json().get("sha") if get_res.status_code == 200 else None
 
@@ -185,7 +277,6 @@ def save_records(records, commit_msg="Update archive records"):
     return put_res.status_code in [200, 201]
 
 def upload_image_to_github(uploaded_file):
-    """관계자가 올린 이미지 파일을 깃허브 저장소에 저장하고 이미지 URL을 반환합니다."""
     if not github_api_available() or uploaded_file is None:
         return ""
 
@@ -216,12 +307,12 @@ visible_records = records if st.session_state.is_admin else [r for r in records 
 # ==============================================================================
 # 4. 상단 헤더 & 관계자 로그인 바
 # ==============================================================================
-top_col1, top_col2 = st.columns([4, 1])
+top_col1, top_col2 = st.columns([3, 1])
 with top_col1:
     st.caption("🌺 JEJU 4·3 REGIONAL ARCHIVE | 제주시 월평동 지역사 기록보관소")
 with top_col2:
     if st.session_state.is_admin:
-        if st.button("🔓 관계자 로그아웃", use_container_width=True):
+        if st.button("🔓 로그아웃", use_container_width=True):
             st.session_state.is_admin = False
             st.rerun()
     else:
@@ -240,7 +331,6 @@ with top_col2:
                 else:
                     st.error("아이디 또는 비밀번호가 일치하지 않습니다.")
 
-# 상단 히어로 배너
 st.markdown(f"""
 <div class="hero-banner">
     <div class="hero-badge">제주시 월평동 4·3 기록 아카이브</div>
@@ -250,25 +340,26 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 5. 메인 탭 메뉴 구성 (관계자 로그인 시 '자료 업로드/관리' 탭 자동 추가)
+# 5. 메인 탭 메뉴 구성
 # ==============================================================================
-tab_names = ["🏠 아카이브 홈", "📚 자료 목록 및 열람", "🗺️ 월평동 유적지 지도", "⏳ 사건 연표"]
+tab_names = ["🏠 홈", "📚 자료 목록", "🗺️ 유적지 지도", "⏳ 사건 연표"]
 if st.session_state.is_admin:
-    tab_names.append("✍️ 관계자 자료 등록·관리")
+    tab_names.append("✍️ 자료 등록·관리")
 
 tabs = st.tabs(tab_names)
 
-# ------------------------------------------------------------------------------
 # [탭 1] 아카이브 홈
-# ------------------------------------------------------------------------------
 with tabs[0]:
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("전체 등록 사료", f"{len(visible_records)}건")
-    m2.metric("조사 권역", "5개 주요 터")
-    m3.metric("기록 시기", "1947 ~ 현재")
-    m4.metric("열람 권한", "관계자 편집 모드" if st.session_state.is_admin else "누구나 무료 열람")
+    mode_text = "관계자 편집" if st.session_state.is_admin else "누구나 열람"
+    st.markdown(f"""
+    <div class="stat-grid">
+        <div class="stat-box"><div class="stat-label">전체 등록 사료</div><div class="stat-val">{len(visible_records)}건</div></div>
+        <div class="stat-box"><div class="stat-label">조사 권역</div><div class="stat-val">5개 주요 터</div></div>
+        <div class="stat-box"><div class="stat-label">기록 시기</div><div class="stat-val">1947 ~ 현재</div></div>
+        <div class="stat-box"><div class="stat-label">열람 권한</div><div class="stat-val">{mode_text}</div></div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.markdown("---")
     st.subheader("📌 최근 등록된 월평동 4·3 기록")
     for rec in visible_records[:3]:
         status_tag = "" if rec.get("published", True) else " 🔒 [비공개 임시저장]"
@@ -277,19 +368,17 @@ with tabs[0]:
             <span class="cat-badge">{rec['category']}</span> <span style="color:#D94848; font-weight:700; font-size:0.85rem;">{status_tag}</span>
             <h4 style="margin: 8px 0 6px 0; color:#141E30;">{rec['title']}</h4>
             <p style="margin: 0; color:#334155; font-size:0.95rem;">{rec['summary']}</p>
-            <div class="meta-text">📍 {rec['location']} &nbsp;|&nbsp; 📅 시기: {rec['year']}년 &nbsp;|&nbsp; ✍️ {rec['author']}</div>
+            <div class="meta-text">📍 {rec['location']} &nbsp;|&nbsp; 📅 {rec['year']}년 &nbsp;|&nbsp; ✍️ {rec['author']}</div>
         </div>
         """, unsafe_allow_html=True)
 
-# ------------------------------------------------------------------------------
 # [탭 2] 자료 목록 및 상세 열람
-# ------------------------------------------------------------------------------
 with tabs[1]:
     f_col1, f_col2 = st.columns([1, 2])
     with f_col1:
         selected_cat = st.selectbox("자료 유형 필터", ["전체", "문서/사료", "현장 사진", "구술 증언", "논문/기사"])
     with f_col2:
-        search_kw = st.text_input("키워드 검색 (제목, 장소, 내용 검색)", placeholder="예: 웃동네, 성담, 소개령...")
+        search_kw = st.text_input("키워드 검색", placeholder="예: 웃동네, 성담, 소개령...")
 
     filtered = visible_records
     if selected_cat != "전체":
@@ -298,26 +387,23 @@ with tabs[1]:
         kw = search_kw.lower()
         filtered = [r for r in filtered if kw in r["title"].lower() or kw in r["content"].lower() or kw in r["location"].lower()]
 
-    st.caption(f"총 **{len(filtered)}건**의 기록이 검색되었습니다. 각 항목을 클릭하면 전체 본문과 이미지를 볼 수 있습니다.")
+    st.caption(f"총 **{len(filtered)}건**의 기록이 검색되었습니다.")
 
     for rec in filtered:
         badge = "" if rec.get("published", True) else "🔒 [임시저장] "
-        with st.expander(f"{badge}[{rec['category']}] {rec['title']}  ({rec['year']}년 · {rec['location']})"):
+        with st.expander(f"{badge}[{rec['category']}] {rec['title']} ({rec['year']}년)"):
             st.markdown(f"**요약:** {rec['summary']}")
             st.markdown("---")
             if rec.get("image_url"):
                 st.image(rec["image_url"], caption=rec["title"], use_container_width=True)
             st.write(rec["content"])
-            st.info(f"📌 **자료 출처:** {rec['source']}  |  **조사/작성:** {rec['author']}  |  **등록일:** {rec['created_at']}")
+            st.info(f"📌 **출처:** {rec['source']} | **작성:** {rec['author']} | **등록일:** {rec['created_at']}")
 
-# ------------------------------------------------------------------------------
 # [탭 3] 월평동 유적지 지도
-# ------------------------------------------------------------------------------
 with tabs[2]:
     st.subheader("🗺️ 제주시 월평동 4·3 주요 조사 지점")
-    st.caption("지도 위의 핀을 클릭하면 해당 지점의 역사적 배경을 확인할 수 있습니다.")
+    st.caption("지도 위의 핀을 누르면 상세 설명을 볼 수 있습니다.")
 
-    # 제주시 월평동 일대 주요 조사 좌표
     locations_data = [
         {"name": "월평마을 본동 옛터", "lat": 33.4735, "lon": 126.5592, "desc": "4·3 당시 마을 중심지로, 1949년 전략촌 성담 축조의 중심 구역입니다."},
         {"name": "월평 웃동네 잃어버린 마을 터", "lat": 33.4678, "lon": 126.5615, "desc": "1948년 11월 중산간 소개령 당시 전소되어 복구되지 못한 옛 집터 일대입니다."},
@@ -329,16 +415,14 @@ with tabs[2]:
     for loc in locations_data:
         folium.Marker(
             [loc["lat"], loc["lon"]],
-            popup=folium.Popup(f"<b>{loc['name']}</b><br>{loc['desc']}", max_width=250),
+            popup=folium.Popup(f"<b>{loc['name']}</b><br>{loc['desc']}", max_width=240),
             tooltip=loc["name"],
             icon=folium.Icon(color="red", icon="info-sign")
         ).add_to(m)
 
-    st_folium(m, width="100%", height=450)
+    st_folium(m, width="100%", height=420)
 
-# ------------------------------------------------------------------------------
 # [탭 4] 사건 연표
-# ------------------------------------------------------------------------------
 with tabs[3]:
     st.subheader("⏳ 제주시 월평동 4·3 주요 연표")
     timeline_items = [
@@ -350,15 +434,13 @@ with tabs[3]:
     ]
     for period, event in timeline_items:
         st.markdown(f"""
-        <div class="archive-card" style="border-left: 5px solid {COLOR_ACCENT_RED}; padding: 1rem 1.4rem;">
-            <strong style="color:{COLOR_ACCENT_RED}; font-size:1.05rem;">{period}</strong>
+        <div class="archive-card" style="border-left: 5px solid {COLOR_ACCENT_RED}; padding: 1rem 1.2rem;">
+            <strong style="color:{COLOR_ACCENT_RED}; font-size:1.02rem;">{period}</strong>
             <p style="margin: 4px 0 0 0; color:#1F2937;">{event}</p>
         </div>
         """, unsafe_allow_html=True)
 
-# ------------------------------------------------------------------------------
-# [탭 5] 관계자 전용 자료 등록 및 수정/삭제 (로그인 시에만 표시)
-# ------------------------------------------------------------------------------
+# [탭 5] 관계자 전용 자료 등록 및 수정/삭제
 if st.session_state.is_admin:
     with tabs[4]:
         st.subheader("✍️ 새 조사 자료 업로드")
@@ -376,7 +458,7 @@ if st.session_state.is_admin:
             new_summary = st.text_input("한 줄 요약 *", placeholder="목록 카드에 표시될 핵심 요약 문장을 적어주세요.")
             new_content = st.text_area("상세 본문 내용 *", height=180, placeholder="조사한 상세 기록이나 구술 내용을 입력하세요.")
             new_image = st.file_uploader("현장 사진 또는 문서 스캔본 첨부 (선택)", type=["png", "jpg", "jpeg"])
-            is_published = st.checkbox("즉시 시청자에게 공개하기 (체크 해제 시 관계자만 보는 임시저장으로 등록)", value=True)
+            is_published = st.checkbox("즉시 시청자에게 공개하기 (체크 해제 시 비공개 임시저장)", value=True)
 
             submitted = st.form_submit_button("📥 아카이브에 저장하기", type="primary")
             if submitted:
