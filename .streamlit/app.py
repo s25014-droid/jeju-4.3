@@ -10,7 +10,7 @@ from datetime import datetime
 # ==============================================================================
 # 🎨 [UI 및 기본 설정 영역] - 디자인이나 문구를 바꾸고 싶을 때 여기만 수정하세요!
 # ==============================================================================
-SITE_TITLE = "제주시 월평동 4·3 기억 아카이브"
+SITE_TITLE = "제주시 월평동 4·3 기억의 숲 "
 SITE_SUBTITLE = "제주 4·3 당시 월평마을의 잃어버린 터와 주민들의 기억을 기록하고 보존하는 공간입니다."
 
 # 색상 설정 (원하는 색상 코드로 변경 가능)
@@ -361,7 +361,7 @@ with tabs[0]:
     </div>
     """, unsafe_allow_html=True)
 
-    st.subheader("📌 최근 등록된 월평동 4·3 기록")
+    st.subheader("📌 월평동 4·3 기록")
     for rec in visible_records[:3]:
         status_tag = "" if rec.get("published", True) else " 🔒 [비공개 임시저장]"
         st.markdown(f"""
