@@ -8,18 +8,60 @@ import requests
 from datetime import datetime
 
 # ==============================================================================
-# 🎨 [UI 및 기본 설정 영역] - 디자인이나 문구를 바꾸고 싶을 때 여기만 수정하세요!
+# 🎨 [UI 및 기본 설정 영역] - 밝은 흑백 모노톤 & 동백꽃 갤러리 테마
 # ==============================================================================
-SITE_TITLE = "제주시 월평동 4·3 기억의 숲 "
-SITE_SUBTITLE = "제주 4·3 당시 월평마을의 잃어버린 터와 주민들의 기억을 기록하고 보존하는 공간입니다."
+SITE_TITLE = "제주시 월평동 4·3 기억 아카이브"
+SITE_SUBTITLE = "제주 4·3 당시 월평마을의 잃어버린 터와 주민들의 기억을 밝고 투명하게 기록·보존하는 디지털 전시관입니다."
 
-# 색상 설정 (원하는 색상 코드로 변경 가능)
-COLOR_PRIMARY_NAVY = "#141E30"   # 상단 배너 및 포인트 네이비 색상
-COLOR_ACCENT_RED = "#D94848"     # 동백꽃 포인트 레드 색상
-COLOR_BG_IVORY = "#FBF9F5"       # 배경 웜 아이보리 색상
+# 색상 설정 (밝은 흑백 모노톤 + 선명한 동백 레드 포인트)
+COLOR_PRIMARY_BLACK = "#111827"  # 메인 차콜 블랙 (텍스트 및 강조)
+COLOR_ACCENT_RED = "#E11D48"     # 선명한 동백꽃 레드 포인트
+COLOR_BG_WHITE = "#FAFAFA"       # 밝고 깨끗한 화이트 그레이 배경
+COLOR_CARD_BG = "#FFFFFF"        # 순백색 카드 배경
+COLOR_BORDER = "#E4E4E7"         # 미니멀 라이트 그레이 테두리
+
+# 코드 내장형 고화질 동백꽃 일러스트 (SVG)
+CAMELLIA_SVG_HERO = """
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
+  <!-- 동백 잎사귀 -->
+  <path d="M100 105 C65 75, 30 95, 45 135 C65 140, 90 125, 100 105 Z" fill="#1F2937" opacity="0.85"/>
+  <path d="M105 100 C135 65, 175 80, 160 120 C140 130, 115 118, 105 100 Z" fill="#374151" opacity="0.8"/>
+  <path d="M100 110 C80 145, 105 180, 130 160 C135 140, 120 120, 100 110 Z" fill="#111827" opacity="0.75"/>
+  <!-- 바깥 꽃잎 (5장) -->
+  <circle cx="100" cy="62" r="28" fill="#E11D48"/>
+  <circle cx="136" cy="88" r="28" fill="#BE123C"/>
+  <circle cx="122" cy="130" r="28" fill="#E11D48"/>
+  <circle cx="78" cy="130" r="28" fill="#BE123C"/>
+  <circle cx="64" cy="88" r="28" fill="#E11D48"/>
+  <!-- 안쪽 꽃잎 -->
+  <circle cx="100" cy="76" r="20" fill="#FB7185" opacity="0.65"/>
+  <circle cx="120" cy="95" r="20" fill="#F43F5E" opacity="0.7"/>
+  <circle cx="112" cy="118" r="20" fill="#FB7185" opacity="0.65"/>
+  <circle cx="88" cy="118" r="20" fill="#F43F5E" opacity="0.7"/>
+  <circle cx="80" cy="95" r="20" fill="#FB7185" opacity="0.65"/>
+  <!-- 노란 꽃술 -->
+  <circle cx="100" cy="100" r="13" fill="#FACC15"/>
+  <circle cx="95" cy="95" r="2.5" fill="#FEF08A"/>
+  <circle cx="105" cy="96" r="2.5" fill="#FEF08A"/>
+  <circle cx="100" cy="105" r="2.5" fill="#FEF08A"/>
+  <circle cx="94" cy="103" r="2" fill="#CA8A04"/>
+  <circle cx="106" cy="103" r="2" fill="#CA8A04"/>
+</svg>
+"""
+
+CAMELLIA_ICON_SMALL = """
+<svg viewBox="0 0 40 40" width="20" height="20" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 4px;">
+  <circle cx="20" cy="11" r="7" fill="#E11D48"/>
+  <circle cx="28" cy="17" r="7" fill="#BE123C"/>
+  <circle cx="25" cy="27" r="7" fill="#E11D48"/>
+  <circle cx="15" cy="27" r="7" fill="#BE123C"/>
+  <circle cx="12" cy="17" r="7" fill="#E11D48"/>
+  <circle cx="20" cy="20" r="4.5" fill="#FACC15"/>
+</svg>
+"""
 
 # ==============================================================================
-# 1. 페이지 기본 설정 및 커스텀 CSS (하단 배지 강제 숨김 + 모바일 최적화)
+# 1. 페이지 기본 설정 및 커스텀 CSS
 # ==============================================================================
 st.set_page_config(
     page_title=SITE_TITLE,
@@ -30,7 +72,7 @@ st.set_page_config(
 
 st.markdown(f"""
 <style>
-    /* 1. 스트림릿 기본 상단 바, 우측 메뉴, 하단 제작자/Hosted with Streamlit 배지 강제 제거 */
+    /* 1. 스트림릿 기본 상단 바, 우측 메뉴, 하단 배지 숨김 */
     header[data-testid="stHeader"],
     footer,
     #MainMenu,
@@ -48,116 +90,170 @@ st.markdown(f"""
         bottom: -9999px !important;
     }}
 
-    /* 2. 전체 배경 및 여백 최적화 */
+    /* 2. 밝은 흑백 모노톤 전체 배경 */
     .stApp {{
-        background-color: {COLOR_BG_IVORY};
+        background-color: {COLOR_BG_WHITE};
+        color: {COLOR_PRIMARY_BLACK};
     }}
     .block-container {{
-        padding-top: 1.2rem !important;
-        padding-bottom: 2rem !important;
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-        max-width: 1100px;
+        padding-top: 1.4rem !important;
+        padding-bottom: 2.5rem !important;
+        padding-left: 1.2rem !important;
+        padding-right: 1.2rem !important;
+        max-width: 1080px;
     }}
 
-    /* 3. 상단 히어로 배너 */
+    /* 3. 밝고 세련된 흑백 히어로 배너 + 우측 동백꽃 일러스트 */
     .hero-banner {{
-        background: linear-gradient(135deg, {COLOR_PRIMARY_NAVY} 0%, #243B55 100%);
-        padding: 2.2rem 1.8rem;
-        border-radius: 16px;
-        color: white;
-        margin-bottom: 1.2rem;
-        box-shadow: 0 10px 25px rgba(20, 30, 48, 0.15);
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #FFFFFF 0%, #F4F4F5 100%);
+        border: 1px solid {COLOR_BORDER};
+        border-top: 4px solid {COLOR_PRIMARY_BLACK};
+        padding: 2.4rem 2rem;
+        border-radius: 18px;
+        color: {COLOR_PRIMARY_BLACK};
+        margin-bottom: 1.4rem;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+    }}
+    .hero-content {{
+        position: relative;
+        z-index: 2;
+        max-width: 76%;
+    }}
+    .hero-flower {{
+        position: absolute;
+        right: 24px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 155px;
+        height: 155px;
+        z-index: 1;
+        opacity: 0.95;
+        pointer-events: none;
     }}
     .hero-badge {{
-        display: inline-block;
-        background-color: rgba(217, 72, 72, 0.2);
-        border: 1px solid {COLOR_ACCENT_RED};
-        color: #FF8A8A;
+        display: inline-flex;
+        align-items: center;
+        background-color: #FFF1F2;
+        border: 1px solid #FECDD3;
+        color: {COLOR_ACCENT_RED};
         padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-bottom: 0.8rem;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        margin-bottom: 0.85rem;
     }}
     .hero-title {{
-        font-size: 2rem;
-        font-weight: 800;
-        margin: 0 0 0.5rem 0;
-        letter-spacing: -0.5px;
+        font-size: 2.05rem;
+        font-weight: 900;
+        color: {COLOR_PRIMARY_BLACK};
+        margin: 0 0 0.6rem 0;
+        letter-spacing: -0.8px;
         word-break: keep-all;
     }}
     .hero-desc {{
-        font-size: 1rem;
-        color: #CBD5E1;
+        font-size: 0.98rem;
+        color: #52525B;
         margin: 0;
-        line-height: 1.5;
+        line-height: 1.55;
         word-break: keep-all;
     }}
 
-    /* 4. 상단 통계 요약 박스 (PC 4칸 / 모바일 2x2 격자 자동 전환) */
+    /* 4. 상단 통계 요약 박스 (화이트 & 블랙 미니멀 그리드) */
     .stat-grid {{
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 12px;
-        margin-bottom: 1rem;
+        margin-bottom: 1.4rem;
     }}
     .stat-box {{
-        background: white;
-        border: 1px solid #E5E0D8;
-        border-radius: 12px;
-        padding: 1rem;
+        background: {COLOR_CARD_BG};
+        border: 1px solid {COLOR_BORDER};
+        border-radius: 14px;
+        padding: 1.1rem 1rem;
         text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
     }}
     .stat-label {{
-        font-size: 0.82rem;
-        color: #64748B;
-        margin-bottom: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #71717A;
+        margin-bottom: 5px;
     }}
     .stat-val {{
         font-size: 1.25rem;
         font-weight: 800;
-        color: {COLOR_PRIMARY_NAVY};
+        color: {COLOR_PRIMARY_BLACK};
     }}
 
-    /* 5. 자료 카드 디자인 */
+    /* 5. 자료 카드 디자인 (깨끗한 화이트 갤러리 카드) */
     .archive-card {{
-        background-color: white;
-        border: 1px solid #E5E0D8;
-        border-radius: 12px;
-        padding: 1.2rem;
-        margin-bottom: 0.9rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        background-color: {COLOR_CARD_BG};
+        border: 1px solid {COLOR_BORDER};
+        border-radius: 14px;
+        padding: 1.35rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.025);
         word-break: keep-all;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }}
+    .archive-card:hover {{
+        border-color: #A1A1AA;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.05);
     }}
     .cat-badge {{
-        background-color: #F1F5F9;
-        color: {COLOR_PRIMARY_NAVY};
+        display: inline-block;
+        background-color: #18181B;
+        color: #FFFFFF;
         padding: 3px 10px;
         border-radius: 6px;
-        font-size: 0.8rem;
+        font-size: 0.78rem;
         font-weight: 700;
+        letter-spacing: -0.2px;
     }}
     .meta-text {{
-        color: #64748B;
+        color: #71717A;
         font-size: 0.82rem;
-        margin-top: 0.5rem;
+        margin-top: 0.65rem;
+        padding-top: 0.55rem;
+        border-top: 1px dashed #E4E4E7;
         line-height: 1.4;
     }}
 
-    /* 6. 휴대폰(모바일) 화면 전용 크기 자동 축소 */
+    /* 6. 탭 스타일 밝은 모노톤 커스텀 */
+    button[data-baseweb="tab"] {{
+        font-weight: 700 !important;
+        color: #52525B !important;
+    }}
+    button[data-baseweb="tab"][aria-selected="true"] {{
+        color: {COLOR_ACCENT_RED} !important;
+    }}
+
+    /* 7. 휴대폰(모바일) 반응형 최적화 */
     @media (max-width: 768px) {{
         .block-container {{
-            padding-top: 0.8rem !important;
-            padding-left: 0.75rem !important;
-            padding-right: 0.75rem !important;
+            padding-top: 0.9rem !important;
+            padding-left: 0.8rem !important;
+            padding-right: 0.8rem !important;
         }}
         .hero-banner {{
-            padding: 1.4rem 1.1rem;
-            border-radius: 12px;
+            padding: 1.5rem 1.2rem;
+            border-radius: 14px;
+        }}
+        .hero-content {{
+            max-width: 100%;
+        }}
+        .hero-flower {{
+            width: 95px;
+            height: 95px;
+            right: -10px;
+            top: 14px;
+            transform: none;
+            opacity: 0.25;
         }}
         .hero-badge {{
-            font-size: 0.75rem;
+            font-size: 0.74rem;
             padding: 3px 9px;
         }}
         .hero-title {{
@@ -172,16 +268,16 @@ st.markdown(f"""
             gap: 8px;
         }}
         .stat-box {{
-            padding: 0.75rem;
+            padding: 0.8rem;
         }}
         .stat-val {{
             font-size: 1.05rem;
         }}
         .archive-card {{
-            padding: 1rem;
+            padding: 1.05rem;
         }}
         button[data-baseweb="tab"] p {{
-            font-size: 0.85rem !important;
+            font-size: 0.84rem !important;
         }}
     }}
 </style>
