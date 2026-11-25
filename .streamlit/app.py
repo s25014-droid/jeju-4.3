@@ -273,7 +273,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 2. 깃허브(GitHub) 연동 데이터 영구 저장 및 불러오기 함수
+# 2. 깃허브(GitHub) 연동 데이터 영구 저장 및 불러오기 함수 (자료 + 유적지 핀)
 # ==============================================================================
 DEFAULT_RECORDS = [
     {
@@ -320,18 +320,61 @@ DEFAULT_RECORDS = [
     }
 ]
 
+DEFAULT_LOCATIONS = [
+    {
+        "id": "loc_001",
+        "name": "월평마을 본동 옛터",
+        "lat": 33.4735,
+        "lon": 126.5592,
+        "period": "1948 ~ 1950년대",
+        "summary": "4·3 당시 마을 중심지로, 1949년 전략촌 성담 축조의 중심 구역입니다.",
+        "detail": "월평마을 본동은 1948년 말 중산간 소개령 이후에도 일부 주민들이 남아 생활하며 마을을 지켰던 중심 공간입니다. 1949년 초 마을 외곽을 두르는 방어용 돌담(성담)이 축조되었으며, 현재도 옛 안길과 팽나무 주변에 당시의 생활 흔적이 남아 있습니다.",
+        "image_url": ""
+    },
+    {
+        "id": "loc_002",
+        "name": "월평 웃동네 잃어버린 마을 터",
+        "lat": 33.4678,
+        "lon": 126.5615,
+        "period": "1948년 11월 전소",
+        "summary": "1948년 11월 중산간 소개령 당시 전소되어 복구되지 못한 옛 집터 일대입니다.",
+        "detail": "본동 위쪽 중산간 경사면에 자리 잡고 있던 자연마을(웃동네)입니다. 1948년 11월 강경 진압 작전과 소개령으로 40여 가구가 불에 타 소실되었고, 사건 이후에도 주민들이 다시 돌아오지 못하면서 '잃어버린 마을'로 남게 되었습니다.",
+        "image_url": ""
+    },
+    {
+        "id": "loc_003",
+        "name": "월평 옛 성담(방어벽) 잔존 구간",
+        "lat": 33.4748,
+        "lon": 126.5570,
+        "period": "1949년 초 축조",
+        "summary": "주민들이 동원되어 쌓았던 마을 외곽 방어용 돌담 흔적이 남아 있는 곳입니다.",
+        "detail": "토벌대와 무장대의 충돌이 빈번하던 시기, 주민들이 직접 돌을 날라 높이 2~3m 규모로 쌓았던 성담의 일부 구간입니다. 일반 밭담보다 두껍고 촘촘하게 쌓아 올린 겹담 구조가 특징입니다.",
+        "image_url": ""
+    },
+    {
+        "id": "loc_004",
+        "name": "월평동 마을회관 및 구술 채록 거점",
+        "lat": 33.4729,
+        "lon": 126.5585,
+        "period": "현재 기록 거점",
+        "summary": "월평동 원로 주민들의 4·3 기억과 생애사 구술 기록이 모이는 공간입니다.",
+        "detail": "오늘날 월평동 주민들이 모여 마을의 역사를 나누고, 4·3을 직접 겪은 어르신들의 생애사와 증언을 채록·보존하는 거점 공간입니다.",
+        "image_url": ""
+    }
+]
+
 def github_api_available():
     return all(k in st.secrets for k in ["GITHUB_TOKEN", "GITHUB_REPO"])
 
-def load_records():
+def load_json_from_github(file_path, default_data, session_key):
     if not github_api_available():
-        if "local_records" not in st.session_state:
-            st.session_state.local_records = DEFAULT_RECORDS.copy()
-        return st.session_state.local_records
+        if session_key not in st.session_state:
+            st.session_state[session_key] = [item.copy() for item in default_data]
+        return st.session_state[session_key]
 
     token = st.secrets["GITHUB_TOKEN"]
     repo = st.secrets["GITHUB_REPO"]
-    url = f"https://api.github.com/repos/{repo}/contents/data/records.json"
+    url = f"https://api.github.com/repos/{repo}/contents/{file_path}"
     headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
     res = requests.get(url, headers=headers)
 
@@ -339,22 +382,22 @@ def load_records():
         content = base64.b64decode(res.json()["content"]).decode("utf-8")
         return json.loads(content)
     else:
-        return DEFAULT_RECORDS.copy()
+        return [item.copy() for item in default_data]
 
-def save_records(records, commit_msg="Update archive records"):
+def save_json_to_github(file_path, data, commit_msg, session_key):
     if not github_api_available():
-        st.session_state.local_records = records
+        st.session_state[session_key] = data
         return True
 
     token = st.secrets["GITHUB_TOKEN"]
     repo = st.secrets["GITHUB_REPO"]
-    url = f"https://api.github.com/repos/{repo}/contents/data/records.json"
+    url = f"https://api.github.com/repos/{repo}/contents/{file_path}"
     headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
 
     get_res = requests.get(url, headers=headers)
     sha = get_res.json().get("sha") if get_res.status_code == 200 else None
 
-    encoded = base64.b64encode(json.dumps(records, ensure_ascii=False, indent=2).encode("utf-8")).decode("utf-8")
+    encoded = base64.b64encode(json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")).decode("utf-8")
     payload = {"message": commit_msg, "content": encoded}
     if sha:
         payload["sha"] = sha
@@ -381,13 +424,25 @@ def upload_image_to_github(uploaded_file):
         return f"https://raw.githubusercontent.com/{repo}/main/{safe_name}"
     return ""
 
+# 장소 상세 설명 모달 창 (@st.dialog)
+@st.dialog("📍 유적지 상세 기록", width="large")
+def open_location_modal(loc):
+    st.markdown(f"<span class='cat-badge'>{loc.get('period', '제주 4·3 유적')}</span>", unsafe_allow_html=True)
+    st.markdown(f"### {loc['name']}")
+    st.markdown("---")
+    if loc.get("image_url"):
+        st.image(loc["image_url"], caption=loc["name"], use_container_width=True)
+    st.markdown(f"**핵심 요약:** {loc['summary']}")
+    st.write(loc.get("detail", loc["summary"]))
+
 # ==============================================================================
 # 3. 세션 상태 및 권한(관리자 로그인) 관리
 # ==============================================================================
 if "is_admin" not in st.session_state:
     st.session_state.is_admin = False
 
-records = load_records()
+records = load_json_from_github("data/records.json", DEFAULT_RECORDS, "local_records")
+locations_data = load_json_from_github("data/locations.json", DEFAULT_LOCATIONS, "local_locations")
 visible_records = records if st.session_state.is_admin else [r for r in records if r.get("published", True)]
 
 # ==============================================================================
@@ -441,7 +496,7 @@ with tabs[0]:
     st.markdown(f"""
     <div class="stat-grid">
         <div class="stat-box"><div class="stat-label">전체 등록 사료</div><div class="stat-val">{len(visible_records)}건</div></div>
-        <div class="stat-box"><div class="stat-label">조사 권역</div><div class="stat-val">5개 주요 터</div></div>
+        <div class="stat-box"><div class="stat-label">조사 권역</div><div class="stat-val">{len(locations_data)}개 주요 터</div></div>
         <div class="stat-box"><div class="stat-label">기록 시기</div><div class="stat-val">1947 ~ 현재</div></div>
         <div class="stat-box"><div class="stat-label">열람 권한</div><div class="stat-val">{mode_text}</div></div>
     </div>
@@ -486,28 +541,48 @@ with tabs[1]:
             st.write(rec["content"])
             st.info(f"📌 **출처:** {rec['source']} | **작성:** {rec['author']} | **등록일:** {rec['created_at']}")
 
-# [탭 3] 월평동 유적지 지도
+# [탭 3] 월평동 유적지 지도 (핀 클릭 시 상세 창 열기)
 with tabs[2]:
     st.markdown(f"<h3 style='font-size:1.2rem; font-weight:800; color:#111827;'>{CAMELLIA_ICON_SMALL} 제주시 월평동 4·3 주요 조사 지점</h3>", unsafe_allow_html=True)
-    st.caption("지도 위의 핀을 누르면 상세 설명을 볼 수 있습니다.")
+    st.caption("지도 위의 핀을 누르거나 아래 장소 버튼을 누르면 상세 설명 창이 새로 열립니다.")
 
-    locations_data = [
-        {"name": "월평마을 본동 옛터", "lat": 33.4735, "lon": 126.5592, "desc": "4·3 당시 마을 중심지로, 1949년 전략촌 성담 축조의 중심 구역입니다."},
-        {"name": "월평 웃동네 잃어버린 마을 터", "lat": 33.4678, "lon": 126.5615, "desc": "1948년 11월 중산간 소개령 당시 전소되어 복구되지 못한 옛 집터 일대입니다."},
-        {"name": "월평 옛 성담(방어벽) 잔존 구간", "lat": 33.4748, "lon": 126.5570, "desc": "주민들이 동원되어 쌓았던 마을 외곽 방어용 돌담 흔적이 남아 있는 곳입니다."},
-        {"name": "월평동 마을회관 및 구술 채록 거점", "lat": 33.4729, "lon": 126.5585, "desc": "월평동 원로 주민들의 4·3 기억과 생애사 구술 기록이 모이는 공간입니다."}
-    ]
+    center_lat = sum(l["lat"] for l in locations_data) / len(locations_data) if locations_data else 33.4718
+    center_lon = sum(l["lon"] for l in locations_data) / len(locations_data) if locations_data else 126.5595
 
-    m = folium.Map(location=[33.4718, 126.5595], zoom_start=15, tiles="CartoDB positron")
+    m = folium.Map(location=[center_lat, center_lon], zoom_start=15, tiles="CartoDB positron")
     for loc in locations_data:
         folium.Marker(
             [loc["lat"], loc["lon"]],
-            popup=folium.Popup(f"<b>{loc['name']}</b><br>{loc['desc']}", max_width=240),
-            tooltip=loc["name"],
+            tooltip=f"📍 {loc['name']} (클릭하여 상세 보기)",
             icon=folium.Icon(color="red", icon="info-sign")
         ).add_to(m)
 
-    st_folium(m, width="100%", height=420)
+    map_state = st_folium(m, width=None, height=400, key="public_wolpyeong_map", returned_objects=["last_object_clicked"])
+
+    clicked = map_state.get("last_object_clicked") if map_state else None
+    if clicked and "lat" in clicked and "lng" in clicked:
+        c_lat, c_lng = clicked["lat"], clicked["lng"]
+        clicked_key = f"{round(c_lat, 5)}_{round(c_lng, 5)}"
+        if st.session_state.get("last_opened_pin") != clicked_key:
+            for loc in locations_data:
+                if abs(loc["lat"] - c_lat) < 0.0004 and abs(loc["lon"] - c_lng) < 0.0004:
+                    st.session_state.last_opened_pin = clicked_key
+                    open_location_modal(loc)
+                    break
+
+    st.markdown("#### 📌 등록된 유적지 목록 (바로 상세 창 열기)")
+    loc_cols = st.columns(2)
+    for idx, loc in enumerate(locations_data):
+        with loc_cols[idx % 2]:
+            st.markdown(f"""
+            <div class="archive-card" style="padding: 1rem; margin-bottom: 0.5rem;">
+                <span class="cat-badge">{loc.get('period', '조사 지점')}</span>
+                <h4 style="margin: 8px 0 4px 0; font-size:1rem; font-weight:800; color:{COLOR_PRIMARY_BLACK};">📍 {loc['name']}</h4>
+                <p style="margin: 0; font-size:0.86rem; color:#52525B;">{loc['summary']}</p>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button(f"🔍 '{loc['name']}' 상세 설명 창 열기", key=f"open_loc_{loc['id']}", use_container_width=True):
+                open_location_modal(loc)
 
 # [탭 4] 사건 연표
 with tabs[3]:
@@ -527,74 +602,158 @@ with tabs[3]:
         </div>
         """, unsafe_allow_html=True)
 
-# [탭 5] 관계자 전용 자료 등록 및 수정/삭제
+# [탭 5] 관계자 전용 자료 등록 및 수정/삭제 + 지도 핀 클릭 등록/삭제
 if st.session_state.is_admin:
     with tabs[4]:
-        st.subheader("✍️ 새 조사 자료 업로드")
-        with st.form("upload_form", clear_on_submit=True):
-            c1, c2 = st.columns(2)
-            new_title = c1.text_input("자료 제목 *", placeholder="예: 월평동 냇가 일대 유적 현장 답사 보고")
-            new_cat = c2.selectbox("자료 유형 *", ["문서/사료", "현장 사진", "구술 증언", "논문/기사"])
+        admin_tab1, admin_tab2 = st.tabs(["📚 조사 자료 등록·수정", "📍 유적지 지도 핀 추가·삭제"])
 
-            c3, c4, c5 = st.columns(3)
-            new_loc = c3.text_input("관련 장소", value="제주시 월평동")
-            new_year = c4.text_input("사건/자료 연도", value="1948")
-            new_author = c5.text_input("작성자/조사팀", value="월평동 4·3 조사팀")
+        # 서브탭 1: 자료 등록 및 수정/삭제
+        with admin_tab1:
+            st.subheader("✍️ 새 조사 자료 업로드")
+            with st.form("upload_form", clear_on_submit=True):
+                c1, c2 = st.columns(2)
+                new_title = c1.text_input("자료 제목 *", placeholder="예: 월평동 냇가 일대 유적 현장 답사 보고")
+                new_cat = c2.selectbox("자료 유형 *", ["문서/사료", "현장 사진", "구술 증언", "논문/기사"])
 
-            new_source = st.text_input("자료 출처 / 참고문헌", placeholder="예: 제주4·3평화재단 아카이브, 현장 직접 촬영 등")
-            new_summary = st.text_input("한 줄 요약 *", placeholder="목록 카드에 표시될 핵심 요약 문장을 적어주세요.")
-            new_content = st.text_area("상세 본문 내용 *", height=180, placeholder="조사한 상세 기록이나 구술 내용을 입력하세요.")
-            new_image = st.file_uploader("현장 사진 또는 문서 스캔본 첨부 (선택)", type=["png", "jpg", "jpeg"])
-            is_published = st.checkbox("즉시 시청자에게 공개하기 (체크 해제 시 비공개 임시저장)", value=True)
+                c3, c4, c5 = st.columns(3)
+                new_loc = c3.text_input("관련 장소", value="제주시 월평동")
+                new_year = c4.text_input("사건/자료 연도", value="1948")
+                new_author = c5.text_input("작성자/조사팀", value="월평동 4·3 조사팀")
 
-            submitted = st.form_submit_button("📥 아카이브에 저장하기", type="primary")
-            if submitted:
-                if not new_title or not new_summary or not new_content:
-                    st.warning("제목, 한 줄 요약, 상세 본문 내용은 필수 입력 항목입니다.")
-                else:
-                    with st.spinner("자료를 저장하는 중입니다..."):
-                        img_url = upload_image_to_github(new_image)
-                        new_item = {
-                            "id": f"rec_{datetime.now().strftime('%Y%m%d%H%M%S')}",
-                            "title": new_title,
-                            "category": new_cat,
-                            "location": new_loc,
-                            "year": new_year,
-                            "author": new_author,
-                            "source": new_source if new_source else "자체 조사 기록",
-                            "summary": new_summary,
-                            "content": new_content,
-                            "image_url": img_url,
-                            "published": is_published,
-                            "created_at": datetime.now().strftime("%Y-%m-%d")
-                        }
-                        records.insert(0, new_item)
-                        if save_records(records, f"Add record: {new_title}"):
-                            st.success("새 자료가 성공적으로 저장되었습니다!")
-                            st.rerun()
-                        else:
-                            st.error("저장 중 오류가 발생했습니다. Secrets 설정을 확인해 주세요.")
+                new_source = st.text_input("자료 출처 / 참고문헌", placeholder="예: 제주4·3평화재단 아카이브, 현장 직접 촬영 등")
+                new_summary = st.text_input("한 줄 요약 *", placeholder="목록 카드에 표시될 핵심 요약 문장을 적어주세요.")
+                new_content = st.text_area("상세 본문 내용 *", height=180, placeholder="조사한 상세 기록이나 구술 내용을 입력하세요.")
+                new_image = st.file_uploader("현장 사진 또는 문서 스캔본 첨부 (선택)", type=["png", "jpg", "jpeg"])
+                is_published = st.checkbox("즉시 시청자에게 공개하기 (체크 해제 시 비공개 임시저장)", value=True)
 
-        st.markdown("---")
-        st.subheader("🗂️ 기존 등록 자료 수정 / 삭제 관리")
-        for idx, rec in enumerate(records):
-            with st.expander(f"관리: {rec['title']} ({'공개중' if rec.get('published', True) else '비공개'})"):
-                edit_title = st.text_input("제목 수정", value=rec["title"], key=f"t_{rec['id']}")
-                edit_summary = st.text_input("요약 수정", value=rec["summary"], key=f"s_{rec['id']}")
-                edit_content = st.text_area("본문 수정", value=rec["content"], key=f"c_{rec['id']}")
-                edit_pub = st.checkbox("공개 상태 유지", value=rec.get("published", True), key=f"p_{rec['id']}")
+                submitted = st.form_submit_button("📥 아카이브에 저장하기", type="primary")
+                if submitted:
+                    if not new_title or not new_summary or not new_content:
+                        st.warning("제목, 한 줄 요약, 상세 본문 내용은 필수 입력 항목입니다.")
+                    else:
+                        with st.spinner("자료를 저장하는 중입니다..."):
+                            img_url = upload_image_to_github(new_image)
+                            new_item = {
+                                "id": f"rec_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+                                "title": new_title,
+                                "category": new_cat,
+                                "location": new_loc,
+                                "year": new_year,
+                                "author": new_author,
+                                "source": new_source if new_source else "자체 조사 기록",
+                                "summary": new_summary,
+                                "content": new_content,
+                                "image_url": img_url,
+                                "published": is_published,
+                                "created_at": datetime.now().strftime("%Y-%m-%d")
+                            }
+                            records.insert(0, new_item)
+                            if save_json_to_github("data/records.json", records, f"Add record: {new_title}", "local_records"):
+                                st.success("새 자료가 성공적으로 저장되었습니다!")
+                                st.rerun()
+                            else:
+                                st.error("저장 중 오류가 발생했습니다. Secrets 설정을 확인해 주세요.")
 
-                b1, b2 = st.columns([1, 5])
-                if b1.button("💾 수정 저장", key=f"save_{rec['id']}"):
-                    records[idx]["title"] = edit_title
-                    records[idx]["summary"] = edit_summary
-                    records[idx]["content"] = edit_content
-                    records[idx]["published"] = edit_pub
-                    save_records(records, f"Edit record: {edit_title}")
-                    st.success("수정되었습니다.")
+            st.markdown("---")
+            st.subheader("🗂️ 기존 등록 자료 수정 / 삭제 관리")
+            for idx, rec in enumerate(records):
+                with st.expander(f"관리: {rec['title']} ({'공개중' if rec.get('published', True) else '비공개'})"):
+                    edit_title = st.text_input("제목 수정", value=rec["title"], key=f"t_{rec['id']}")
+                    edit_summary = st.text_input("요약 수정", value=rec["summary"], key=f"s_{rec['id']}")
+                    edit_content = st.text_area("본문 수정", value=rec["content"], key=f"c_{rec['id']}")
+                    edit_pub = st.checkbox("공개 상태 유지", value=rec.get("published", True), key=f"p_{rec['id']}")
+
+                    b1, b2 = st.columns([1, 5])
+                    if b1.button("💾 수정 저장", key=f"save_{rec['id']}"):
+                        records[idx]["title"] = edit_title
+                        records[idx]["summary"] = edit_summary
+                        records[idx]["content"] = edit_content
+                        records[idx]["published"] = edit_pub
+                        save_json_to_github("data/records.json", records, f"Edit record: {edit_title}", "local_records")
+                        st.success("수정되었습니다.")
+                        st.rerun()
+                    if b2.button("🗑️ 삭제", key=f"del_{rec['id']}"):
+                        records.pop(idx)
+                        save_json_to_github("data/records.json", records, f"Delete record: {rec['title']}", "local_records")
+                        st.warning("삭제되었습니다.")
+                        st.rerun()
+
+        # 서브탭 2: 지도 위를 직접 클릭해서 핀 추가 & 기존 핀 삭제
+        with admin_tab2:
+            st.subheader("📍 지도에서 위치 클릭하여 새 핀 추가")
+            st.caption("아래 지도에서 핀을 꽂고 싶은 위치를 클릭하면 좌표가 자동으로 입력됩니다.")
+
+            if "picked_lat" not in st.session_state:
+                st.session_state.picked_lat = 33.4718
+            if "picked_lon" not in st.session_state:
+                st.session_state.picked_lon = 126.5595
+
+            pick_map = folium.Map(location=[st.session_state.picked_lat, st.session_state.picked_lon], zoom_start=15)
+            # 기존 핀 표시 (빨강)
+            for loc in locations_data:
+                folium.Marker(
+                    [loc["lat"], loc["lon"]],
+                    tooltip=f"기존 핀: {loc['name']}",
+                    icon=folium.Icon(color="red", icon="info-sign")
+                ).add_to(pick_map)
+            # 새로 선택한 임시 위치 표시 (파랑)
+            folium.Marker(
+                [st.session_state.picked_lat, st.session_state.picked_lon],
+                tooltip="새로 추가할 위치",
+                icon=folium.Icon(color="blue", icon="plus")
+            ).add_to(pick_map)
+
+            pick_result = st_folium(pick_map, width=None, height=340, key="admin_pick_map", returned_objects=["last_clicked"])
+            if pick_result and pick_result.get("last_clicked"):
+                new_lat = round(pick_result["last_clicked"]["lat"], 6)
+                new_lon = round(pick_result["last_clicked"]["lng"], 6)
+                if new_lat != st.session_state.picked_lat or new_lon != st.session_state.picked_lon:
+                    st.session_state.picked_lat = new_lat
+                    st.session_state.picked_lon = new_lon
                     st.rerun()
-                if b2.button("🗑️ 삭제", key=f"del_{rec['id']}"):
-                    records.pop(idx)
-                    save_records(records, f"Delete record: {rec['title']}")
+
+            st.info(f"선택된 좌표: 위도 **{st.session_state.picked_lat}**, 경도 **{st.session_state.picked_lon}** (지도를 다시 클릭하면 위치가 바뀝니다)")
+
+            with st.form("add_pin_form", clear_on_submit=True):
+                p1, p2 = st.columns(2)
+                pin_name = p1.text_input("장소 이름 *", placeholder="예: 월평동 옛 주둔소 터")
+                pin_period = p2.text_input("시기/분류", value="1948년 유적")
+
+                pin_summary = st.text_input("한 줄 요약 *", placeholder="목록 카드에 짧게 표시될 설명")
+                pin_detail = st.text_area("상세 설명 (핀 클릭 시 새 창에 표시됨) *", height=140, placeholder="이 장소의 4·3 당시 역사와 현재 남아 있는 흔적을 자세히 적어주세요.")
+                pin_image = st.file_uploader("현장 사진 첨부 (선택)", type=["png", "jpg", "jpeg"], key="pin_img_uploader")
+
+                pin_submitted = st.form_submit_button("📌 이 위치에 핀 추가하기", type="primary")
+                if pin_submitted:
+                    if not pin_name or not pin_summary or not pin_detail:
+                        st.warning("장소 이름, 한 줄 요약, 상세 설명을 모두 입력해 주세요.")
+                    else:
+                        with st.spinner("지도 핀을 저장하는 중입니다..."):
+                            pin_img_url = upload_image_to_github(pin_image)
+                            new_pin = {
+                                "id": f"loc_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+                                "name": pin_name,
+                                "lat": float(st.session_state.picked_lat),
+                                "lon": float(st.session_state.picked_lon),
+                                "period": pin_period,
+                                "summary": pin_summary,
+                                "detail": pin_detail,
+                                "image_url": pin_img_url
+                            }
+                            locations_data.append(new_pin)
+                            if save_json_to_github("data/locations.json", locations_data, f"Add map pin: {pin_name}", "local_locations"):
+                                st.success(f"'{pin_name}' 핀이 지도에 추가되었습니다!")
+                                st.rerun()
+                            else:
+                                st.error("저장 중 오류가 발생했습니다.")
+
+            st.markdown("---")
+            st.subheader("🗑️ 등록된 지도 핀 삭제")
+            for idx, loc in enumerate(locations_data):
+                col_info, col_del = st.columns([4, 1])
+                col_info.markdown(f"**📍 {loc['name']}** — {loc['summary']}")
+                if col_del.button("삭제", key=f"del_pin_{loc['id']}"):
+                    locations_data.pop(idx)
+                    save_json_to_github("data/locations.json", locations_data, f"Delete map pin: {loc['name']}", "local_locations")
                     st.warning("삭제되었습니다.")
                     st.rerun()
