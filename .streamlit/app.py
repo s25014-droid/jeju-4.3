@@ -417,18 +417,14 @@ with top_col2:
                 else:
                     st.error("아이디 또는 비밀번호가 일치하지 않습니다.")
 
-st.markdown(f"""
-<div class="hero-banner">
-    <div class="hero-content">
-        <div class="hero-badge">{CAMELLIA_ICON_SMALL} 기억과 평화의 디지털 아카이브</div>
-        <h1 class="hero-title">{SITE_TITLE}</h1>
-        <p class="hero-desc">{SITE_SUBTITLE}</p>
-    </div>
-    <div class="hero-flower">
-        {CAMELLIA_SVG_HERO}
-    </div>
+st.markdown(f"""<div class="hero-banner">
+<div class="hero-content">
+<div class="hero-badge">{CAMELLIA_ICON_SMALL} 기억과 평화의 디지털 아카이브</div>
+<h1 class="hero-title">{SITE_TITLE}</h1>
+<p class="hero-desc">{SITE_SUBTITLE}</p>
 </div>
-""", unsafe_allow_html=True)
+<div class="hero-flower">{CAMELLIA_SVG_HERO}</div>
+</div>""", unsafe_allow_html=True)
 
 # ==============================================================================
 # 5. 메인 탭 메뉴 구성
