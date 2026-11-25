@@ -10,8 +10,8 @@ from datetime import datetime
 # ==============================================================================
 # 🎨 [UI 및 기본 설정 영역] - 밝은 흑백 모노톤 & 동백꽃 갤러리 테마
 # ==============================================================================
-SITE_TITLE = "제주시 월평동 4·3 기억 아카이브"
-SITE_SUBTITLE = "제주 4·3 당시 월평마을의 잃어버린 터와 주민들의 기억을 밝고 투명하게 기록·보존하는 디지털 전시관입니다."
+SITE_TITLE = "제주시 월평동 4·3 기억 숲"
+SITE_SUBTITLE = "제주 4·3 당시 월평마을의 잃어버린 터와 주민들의 기억을 기록·보존하는 디지털 전시관입니다."
 
 # 색상 설정 (밝은 흑백 모노톤 + 선명한 동백 레드 포인트)
 COLOR_PRIMARY_BLACK = "#111827"  # 메인 차콜 블랙 (텍스트 및 강조)
@@ -447,7 +447,7 @@ with tabs[0]:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown(f"<h3 style='font-size:1.2rem; font-weight:800; color:#111827; margin-bottom:0.8rem;'>{CAMELLIA_ICON_SMALL} 최근 등록된 월평동 4·3 기록</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='font-size:1.2rem; font-weight:800; color:#111827; margin-bottom:0.8rem;'>{CAMELLIA_ICON_SMALL} 등록된 월평동 4·3 기록</h3>", unsafe_allow_html=True)
     for rec in visible_records[:3]:
         status_tag = "" if rec.get("published", True) else " 🔒 [비공개 임시저장]"
         st.markdown(f"""
