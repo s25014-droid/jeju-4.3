@@ -23,23 +23,19 @@ COLOR_BORDER = "#E4E4E7"         # 미니멀 라이트 그레이 테두리
 # 코드 내장형 고화질 동백꽃 일러스트 (SVG)
 CAMELLIA_SVG_HERO = """
 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-  <!-- 동백 잎사귀 -->
   <path d="M100 105 C65 75, 30 95, 45 135 C65 140, 90 125, 100 105 Z" fill="#1F2937" opacity="0.85"/>
   <path d="M105 100 C135 65, 175 80, 160 120 C140 130, 115 118, 105 100 Z" fill="#374151" opacity="0.8"/>
   <path d="M100 110 C80 145, 105 180, 130 160 C135 140, 120 120, 100 110 Z" fill="#111827" opacity="0.75"/>
-  <!-- 바깥 꽃잎 (5장) -->
   <circle cx="100" cy="62" r="28" fill="#E11D48"/>
   <circle cx="136" cy="88" r="28" fill="#BE123C"/>
   <circle cx="122" cy="130" r="28" fill="#E11D48"/>
   <circle cx="78" cy="130" r="28" fill="#BE123C"/>
   <circle cx="64" cy="88" r="28" fill="#E11D48"/>
-  <!-- 안쪽 꽃잎 -->
   <circle cx="100" cy="76" r="20" fill="#FB7185" opacity="0.65"/>
   <circle cx="120" cy="95" r="20" fill="#F43F5E" opacity="0.7"/>
   <circle cx="112" cy="118" r="20" fill="#FB7185" opacity="0.65"/>
   <circle cx="88" cy="118" r="20" fill="#F43F5E" opacity="0.7"/>
   <circle cx="80" cy="95" r="20" fill="#FB7185" opacity="0.65"/>
-  <!-- 노란 꽃술 -->
   <circle cx="100" cy="100" r="13" fill="#FACC15"/>
   <circle cx="95" cy="95" r="2.5" fill="#FEF08A"/>
   <circle cx="105" cy="96" r="2.5" fill="#FEF08A"/>
@@ -72,7 +68,6 @@ st.set_page_config(
 
 st.markdown(f"""
 <style>
-    /* 1. 스트림릿 기본 상단 바, 우측 메뉴, 하단 배지 숨김 */
     header[data-testid="stHeader"],
     footer,
     #MainMenu,
@@ -90,7 +85,6 @@ st.markdown(f"""
         bottom: -9999px !important;
     }}
 
-    /* 2. 밝은 흑백 모노톤 전체 배경 */
     .stApp {{
         background-color: {COLOR_BG_WHITE};
         color: {COLOR_PRIMARY_BLACK};
@@ -103,7 +97,6 @@ st.markdown(f"""
         max-width: 1080px;
     }}
 
-    /* 3. 밝고 세련된 흑백 히어로 배너 + 우측 동백꽃 일러스트 */
     .hero-banner {{
         position: relative;
         overflow: hidden;
@@ -160,7 +153,6 @@ st.markdown(f"""
         word-break: keep-all;
     }}
 
-    /* 4. 상단 통계 요약 박스 (화이트 & 블랙 미니멀 그리드) */
     .stat-grid {{
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -187,7 +179,6 @@ st.markdown(f"""
         color: {COLOR_PRIMARY_BLACK};
     }}
 
-    /* 5. 자료 카드 디자인 (깨끗한 화이트 갤러리 카드) */
     .archive-card {{
         background-color: {COLOR_CARD_BG};
         border: 1px solid {COLOR_BORDER};
@@ -221,7 +212,6 @@ st.markdown(f"""
         line-height: 1.4;
     }}
 
-    /* 6. 탭 스타일 밝은 모노톤 커스텀 */
     button[data-baseweb="tab"] {{
         font-weight: 700 !important;
         color: #52525B !important;
@@ -230,7 +220,6 @@ st.markdown(f"""
         color: {COLOR_ACCENT_RED} !important;
     }}
 
-    /* 7. 휴대폰(모바일) 반응형 최적화 */
     @media (max-width: 768px) {{
         .block-container {{
             padding-top: 0.9rem !important;
@@ -406,7 +395,7 @@ visible_records = records if st.session_state.is_admin else [r for r in records 
 # ==============================================================================
 top_col1, top_col2 = st.columns([3, 1])
 with top_col1:
-    st.caption("🌺 JEJU 4·3 REGIONAL ARCHIVE | 제주시 월평동 지역사 기록보관소")
+    st.markdown(f"<div style='padding-top:6px; font-size:0.85rem; color:#52525B; font-weight:600;'>{CAMELLIA_ICON_SMALL} JEJU 4·3 REGIONAL ARCHIVE &nbsp;|&nbsp; 제주시 월평동</div>", unsafe_allow_html=True)
 with top_col2:
     if st.session_state.is_admin:
         if st.button("🔓 로그아웃", use_container_width=True):
@@ -430,9 +419,14 @@ with top_col2:
 
 st.markdown(f"""
 <div class="hero-banner">
-    <div class="hero-badge">제주시 월평동 4·3 기록 아카이브</div>
-    <h1 class="hero-title">{SITE_TITLE}</h1>
-    <p class="hero-desc">{SITE_SUBTITLE}</p>
+    <div class="hero-content">
+        <div class="hero-badge">{CAMELLIA_ICON_SMALL} 기억과 평화의 디지털 아카이브</div>
+        <h1 class="hero-title">{SITE_TITLE}</h1>
+        <p class="hero-desc">{SITE_SUBTITLE}</p>
+    </div>
+    <div class="hero-flower">
+        {CAMELLIA_SVG_HERO}
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -457,14 +451,14 @@ with tabs[0]:
     </div>
     """, unsafe_allow_html=True)
 
-    st.subheader("📌 월평동 4·3 기록")
+    st.markdown(f"<h3 style='font-size:1.2rem; font-weight:800; color:#111827; margin-bottom:0.8rem;'>{CAMELLIA_ICON_SMALL} 최근 등록된 월평동 4·3 기록</h3>", unsafe_allow_html=True)
     for rec in visible_records[:3]:
         status_tag = "" if rec.get("published", True) else " 🔒 [비공개 임시저장]"
         st.markdown(f"""
         <div class="archive-card">
-            <span class="cat-badge">{rec['category']}</span> <span style="color:#D94848; font-weight:700; font-size:0.85rem;">{status_tag}</span>
-            <h4 style="margin: 8px 0 6px 0; color:#141E30;">{rec['title']}</h4>
-            <p style="margin: 0; color:#334155; font-size:0.95rem;">{rec['summary']}</p>
+            <span class="cat-badge">{rec['category']}</span> <span style="color:{COLOR_ACCENT_RED}; font-weight:700; font-size:0.85rem;">{status_tag}</span>
+            <h4 style="margin: 10px 0 6px 0; color:{COLOR_PRIMARY_BLACK}; font-size:1.12rem; font-weight:800;">{rec['title']}</h4>
+            <p style="margin: 0; color:#3F3F46; font-size:0.94rem; line-height:1.5;">{rec['summary']}</p>
             <div class="meta-text">📍 {rec['location']} &nbsp;|&nbsp; 📅 {rec['year']}년 &nbsp;|&nbsp; ✍️ {rec['author']}</div>
         </div>
         """, unsafe_allow_html=True)
@@ -498,7 +492,7 @@ with tabs[1]:
 
 # [탭 3] 월평동 유적지 지도
 with tabs[2]:
-    st.subheader("🗺️ 제주시 월평동 4·3 주요 조사 지점")
+    st.markdown(f"<h3 style='font-size:1.2rem; font-weight:800; color:#111827;'>{CAMELLIA_ICON_SMALL} 제주시 월평동 4·3 주요 조사 지점</h3>", unsafe_allow_html=True)
     st.caption("지도 위의 핀을 누르면 상세 설명을 볼 수 있습니다.")
 
     locations_data = [
@@ -508,7 +502,7 @@ with tabs[2]:
         {"name": "월평동 마을회관 및 구술 채록 거점", "lat": 33.4729, "lon": 126.5585, "desc": "월평동 원로 주민들의 4·3 기억과 생애사 구술 기록이 모이는 공간입니다."}
     ]
 
-    m = folium.Map(location=[33.4718, 126.5595], zoom_start=15)
+    m = folium.Map(location=[33.4718, 126.5595], zoom_start=15, tiles="CartoDB positron")
     for loc in locations_data:
         folium.Marker(
             [loc["lat"], loc["lon"]],
@@ -521,7 +515,7 @@ with tabs[2]:
 
 # [탭 4] 사건 연표
 with tabs[3]:
-    st.subheader("⏳ 제주시 월평동 4·3 주요 연표")
+    st.markdown(f"<h3 style='font-size:1.2rem; font-weight:800; color:#111827;'>{CAMELLIA_ICON_SMALL} 제주시 월평동 4·3 주요 연표</h3>", unsafe_allow_html=True)
     timeline_items = [
         ("1947년 3월", "3·1절 발포 사건 이후 제주 전역 긴장 고조 및 월평마을 내 청년 활동 전개"),
         ("1948년 11월", "중산간 지역 강경 진압 작전 및 소개령 발령 — 월평 웃동네 일대 가옥 전소 및 주민 피난"),
@@ -531,9 +525,9 @@ with tabs[3]:
     ]
     for period, event in timeline_items:
         st.markdown(f"""
-        <div class="archive-card" style="border-left: 5px solid {COLOR_ACCENT_RED}; padding: 1rem 1.2rem;">
-            <strong style="color:{COLOR_ACCENT_RED}; font-size:1.02rem;">{period}</strong>
-            <p style="margin: 4px 0 0 0; color:#1F2937;">{event}</p>
+        <div class="archive-card" style="border-left: 4px solid {COLOR_ACCENT_RED}; padding: 1.05rem 1.25rem;">
+            <strong style="color:{COLOR_ACCENT_RED}; font-size:1.02rem;">{CAMELLIA_ICON_SMALL} {period}</strong>
+            <p style="margin: 6px 0 0 0; color:#27272A; line-height:1.5;">{event}</p>
         </div>
         """, unsafe_allow_html=True)
 
