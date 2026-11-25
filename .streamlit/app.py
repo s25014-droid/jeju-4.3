@@ -544,7 +544,7 @@ with tabs[2]:
     center_lat = sum(l["lat"] for l in locations_data) / len(locations_data) if locations_data else 33.4718
     center_lon = sum(l["lon"] for l in locations_data) / len(locations_data) if locations_data else 126.5595
 
-    m = folium.Map(location=[center_lat, center_lon], zoom_start=15, tiles="CartoDB positron")
+    m = folium.Map(location=[center_lat, center_lon], zoom_start=15)
     for loc in locations_data:
         img_html = f"<img src='{loc['image_url']}' style='width:100%; border-radius:8px; margin:8px 0; max-height:140px; object-fit:cover;'/>" if loc.get("image_url") else ""
         popup_html = f"""
