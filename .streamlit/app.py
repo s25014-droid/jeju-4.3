@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import folium
-from streamlit_folium import st_folium
 import json
 import base64
 import requests
@@ -21,40 +20,36 @@ COLOR_CARD_BG = "#FFFFFF"        # 순백색 카드 배경
 COLOR_BORDER = "#E4E4E7"         # 미니멀 라이트 그레이 테두리
 
 # 코드 내장형 고화질 동백꽃 일러스트 (SVG)
-CAMELLIA_SVG_HERO = """
-<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-  <path d="M100 105 C65 75, 30 95, 45 135 C65 140, 90 125, 100 105 Z" fill="#1F2937" opacity="0.85"/>
-  <path d="M105 100 C135 65, 175 80, 160 120 C140 130, 115 118, 105 100 Z" fill="#374151" opacity="0.8"/>
-  <path d="M100 110 C80 145, 105 180, 130 160 C135 140, 120 120, 100 110 Z" fill="#111827" opacity="0.75"/>
-  <circle cx="100" cy="62" r="28" fill="#E11D48"/>
-  <circle cx="136" cy="88" r="28" fill="#BE123C"/>
-  <circle cx="122" cy="130" r="28" fill="#E11D48"/>
-  <circle cx="78" cy="130" r="28" fill="#BE123C"/>
-  <circle cx="64" cy="88" r="28" fill="#E11D48"/>
-  <circle cx="100" cy="76" r="20" fill="#FB7185" opacity="0.65"/>
-  <circle cx="120" cy="95" r="20" fill="#F43F5E" opacity="0.7"/>
-  <circle cx="112" cy="118" r="20" fill="#FB7185" opacity="0.65"/>
-  <circle cx="88" cy="118" r="20" fill="#F43F5E" opacity="0.7"/>
-  <circle cx="80" cy="95" r="20" fill="#FB7185" opacity="0.65"/>
-  <circle cx="100" cy="100" r="13" fill="#FACC15"/>
-  <circle cx="95" cy="95" r="2.5" fill="#FEF08A"/>
-  <circle cx="105" cy="96" r="2.5" fill="#FEF08A"/>
-  <circle cx="100" cy="105" r="2.5" fill="#FEF08A"/>
-  <circle cx="94" cy="103" r="2" fill="#CA8A04"/>
-  <circle cx="106" cy="103" r="2" fill="#CA8A04"/>
-</svg>
-"""
+CAMELLIA_SVG_HERO = """<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
+<path d="M100 105 C65 75, 30 95, 45 135 C65 140, 90 125, 100 105 Z" fill="#1F2937" opacity="0.85"/>
+<path d="M105 100 C135 65, 175 80, 160 120 C140 130, 115 118, 105 100 Z" fill="#374151" opacity="0.8"/>
+<path d="M100 110 C80 145, 105 180, 130 160 C135 140, 120 120, 100 110 Z" fill="#111827" opacity="0.75"/>
+<circle cx="100" cy="62" r="28" fill="#E11D48"/>
+<circle cx="136" cy="88" r="28" fill="#BE123C"/>
+<circle cx="122" cy="130" r="28" fill="#E11D48"/>
+<circle cx="78" cy="130" r="28" fill="#BE123C"/>
+<circle cx="64" cy="88" r="28" fill="#E11D48"/>
+<circle cx="100" cy="76" r="20" fill="#FB7185" opacity="0.65"/>
+<circle cx="120" cy="95" r="20" fill="#F43F5E" opacity="0.7"/>
+<circle cx="112" cy="118" r="20" fill="#FB7185" opacity="0.65"/>
+<circle cx="88" cy="118" r="20" fill="#F43F5E" opacity="0.7"/>
+<circle cx="80" cy="95" r="20" fill="#FB7185" opacity="0.65"/>
+<circle cx="100" cy="100" r="13" fill="#FACC15"/>
+<circle cx="95" cy="95" r="2.5" fill="#FEF08A"/>
+<circle cx="105" cy="96" r="2.5" fill="#FEF08A"/>
+<circle cx="100" cy="105" r="2.5" fill="#FEF08A"/>
+<circle cx="94" cy="103" r="2" fill="#CA8A04"/>
+<circle cx="106" cy="103" r="2" fill="#CA8A04"/>
+</svg>"""
 
-CAMELLIA_ICON_SMALL = """
-<svg viewBox="0 0 40 40" width="20" height="20" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 4px;">
-  <circle cx="20" cy="11" r="7" fill="#E11D48"/>
-  <circle cx="28" cy="17" r="7" fill="#BE123C"/>
-  <circle cx="25" cy="27" r="7" fill="#E11D48"/>
-  <circle cx="15" cy="27" r="7" fill="#BE123C"/>
-  <circle cx="12" cy="17" r="7" fill="#E11D48"/>
-  <circle cx="20" cy="20" r="4.5" fill="#FACC15"/>
-</svg>
-"""
+CAMELLIA_ICON_SMALL = """<svg viewBox="0 0 40 40" width="20" height="20" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 4px;">
+<circle cx="20" cy="11" r="7" fill="#E11D48"/>
+<circle cx="28" cy="17" r="7" fill="#BE123C"/>
+<circle cx="25" cy="27" r="7" fill="#E11D48"/>
+<circle cx="15" cy="27" r="7" fill="#BE123C"/>
+<circle cx="12" cy="17" r="7" fill="#E11D48"/>
+<circle cx="20" cy="20" r="4.5" fill="#FACC15"/>
+</svg>"""
 
 # ==============================================================================
 # 1. 페이지 기본 설정 및 커스텀 CSS
@@ -541,36 +536,35 @@ with tabs[1]:
             st.write(rec["content"])
             st.info(f"📌 **출처:** {rec['source']} | **작성:** {rec['author']} | **등록일:** {rec['created_at']}")
 
-# [탭 3] 월평동 유적지 지도 (핀 클릭 시 상세 창 열기)
+# [탭 3] 월평동 유적지 지도 (핀 클릭 시 상세 카드 창 표시 + 하단 모달 창 열기)
 with tabs[2]:
     st.markdown(f"<h3 style='font-size:1.2rem; font-weight:800; color:#111827;'>{CAMELLIA_ICON_SMALL} 제주시 월평동 4·3 주요 조사 지점</h3>", unsafe_allow_html=True)
-    st.caption("지도 위의 핀을 누르거나 아래 장소 버튼을 누르면 상세 설명 창이 새로 열립니다.")
+    st.caption("지도 위의 핀을 누르면 상세 설명 창이 열리며, 아래 목록 버튼으로 큰 창에서도 볼 수 있습니다.")
 
     center_lat = sum(l["lat"] for l in locations_data) / len(locations_data) if locations_data else 33.4718
     center_lon = sum(l["lon"] for l in locations_data) / len(locations_data) if locations_data else 126.5595
 
     m = folium.Map(location=[center_lat, center_lon], zoom_start=15, tiles="CartoDB positron")
     for loc in locations_data:
+        img_html = f"<img src='{loc['image_url']}' style='width:100%; border-radius:8px; margin:8px 0; max-height:140px; object-fit:cover;'/>" if loc.get("image_url") else ""
+        popup_html = f"""
+        <div style="font-family: sans-serif; width: 240px; line-height: 1.45; word-break: keep-all;">
+            <span style="background:#18181B; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold;">{loc.get('period', '4·3 유적')}</span>
+            <h4 style="margin:6px 0 4px 0; font-size:15px; color:#111827;">{loc['name']}</h4>
+            {img_html}
+            <p style="margin:0; font-size:12.5px; color:#3F3F46;">{loc.get('detail', loc['summary'])}</p>
+        </div>
+        """
         folium.Marker(
             [loc["lat"], loc["lon"]],
-            tooltip=f"📍 {loc['name']} (클릭하여 상세 보기)",
+            popup=folium.Popup(popup_html, max_width=270),
+            tooltip=loc["name"],
             icon=folium.Icon(color="red", icon="info-sign")
         ).add_to(m)
 
-    map_state = st_folium(m, width=None, height=400, key="public_wolpyeong_map", returned_objects=["last_object_clicked"])
+    st.components.v1.html(m._repr_html_(), height=420)
 
-    clicked = map_state.get("last_object_clicked") if map_state else None
-    if clicked and "lat" in clicked and "lng" in clicked:
-        c_lat, c_lng = clicked["lat"], clicked["lng"]
-        clicked_key = f"{round(c_lat, 5)}_{round(c_lng, 5)}"
-        if st.session_state.get("last_opened_pin") != clicked_key:
-            for loc in locations_data:
-                if abs(loc["lat"] - c_lat) < 0.0004 and abs(loc["lon"] - c_lng) < 0.0004:
-                    st.session_state.last_opened_pin = clicked_key
-                    open_location_modal(loc)
-                    break
-
-    st.markdown("#### 📌 등록된 유적지 목록 (바로 상세 창 열기)")
+    st.markdown("#### 📌 등록된 유적지 목록 (큰 창으로 상세 보기)")
     loc_cols = st.columns(2)
     for idx, loc in enumerate(locations_data):
         with loc_cols[idx % 2]:
@@ -602,7 +596,7 @@ with tabs[3]:
         </div>
         """, unsafe_allow_html=True)
 
-# [탭 5] 관계자 전용 자료 등록 및 수정/삭제 + 지도 핀 클릭 등록/삭제
+# [탭 5] 관계자 전용 자료 등록 및 수정/삭제 + 지도 핀 추가/삭제
 if st.session_state.is_admin:
     with tabs[4]:
         admin_tab1, admin_tab2 = st.tabs(["📚 조사 자료 등록·수정", "📍 유적지 지도 핀 추가·삭제"])
@@ -678,43 +672,26 @@ if st.session_state.is_admin:
                         st.warning("삭제되었습니다.")
                         st.rerun()
 
-        # 서브탭 2: 지도 위를 직접 클릭해서 핀 추가 & 기존 핀 삭제
+        # 서브탭 2: 지도 위 클릭으로 좌표 확인 후 새 핀 추가 & 기존 핀 삭제
         with admin_tab2:
-            st.subheader("📍 지도에서 위치 클릭하여 새 핀 추가")
-            st.caption("아래 지도에서 핀을 꽂고 싶은 위치를 클릭하면 좌표가 자동으로 입력됩니다.")
+            st.subheader("📍 새 유적지 지도 핀 추가")
+            st.caption("아래 지도에서 원하는 위치를 클릭하면 그 자리에 위도·경도 좌표 말풍선이 바로 뜹니다. 확인된 숫자를 아래 칸에 입력해 주세요.")
 
-            if "picked_lat" not in st.session_state:
-                st.session_state.picked_lat = 33.4718
-            if "picked_lon" not in st.session_state:
-                st.session_state.picked_lon = 126.5595
-
-            pick_map = folium.Map(location=[st.session_state.picked_lat, st.session_state.picked_lon], zoom_start=15)
-            # 기존 핀 표시 (빨강)
+            pick_map = folium.Map(location=[33.4718, 126.5595], zoom_start=15)
             for loc in locations_data:
                 folium.Marker(
                     [loc["lat"], loc["lon"]],
                     tooltip=f"기존 핀: {loc['name']}",
                     icon=folium.Icon(color="red", icon="info-sign")
                 ).add_to(pick_map)
-            # 새로 선택한 임시 위치 표시 (파랑)
-            folium.Marker(
-                [st.session_state.picked_lat, st.session_state.picked_lon],
-                tooltip="새로 추가할 위치",
-                icon=folium.Icon(color="blue", icon="plus")
-            ).add_to(pick_map)
-
-            pick_result = st_folium(pick_map, width=None, height=340, key="admin_pick_map", returned_objects=["last_clicked"])
-            if pick_result and pick_result.get("last_clicked"):
-                new_lat = round(pick_result["last_clicked"]["lat"], 6)
-                new_lon = round(pick_result["last_clicked"]["lng"], 6)
-                if new_lat != st.session_state.picked_lat or new_lon != st.session_state.picked_lon:
-                    st.session_state.picked_lat = new_lat
-                    st.session_state.picked_lon = new_lon
-                    st.rerun()
-
-            st.info(f"선택된 좌표: 위도 **{st.session_state.picked_lat}**, 경도 **{st.session_state.picked_lon}** (지도를 다시 클릭하면 위치가 바뀝니다)")
+            pick_map.add_child(folium.LatLngPopup())
+            st.components.v1.html(pick_map._repr_html_(), height=340)
 
             with st.form("add_pin_form", clear_on_submit=True):
+                c_lat, c_lon = st.columns(2)
+                pin_lat = c_lat.number_input("위도 (지도 클릭 시 표시되는 첫 번째 숫자) *", value=33.472000, format="%.6f", step=0.0001)
+                pin_lon = c_lon.number_input("경도 (지도 클릭 시 표시되는 두 번째 숫자) *", value=126.559000, format="%.6f", step=0.0001)
+
                 p1, p2 = st.columns(2)
                 pin_name = p1.text_input("장소 이름 *", placeholder="예: 월평동 옛 주둔소 터")
                 pin_period = p2.text_input("시기/분류", value="1948년 유적")
@@ -723,7 +700,7 @@ if st.session_state.is_admin:
                 pin_detail = st.text_area("상세 설명 (핀 클릭 시 새 창에 표시됨) *", height=140, placeholder="이 장소의 4·3 당시 역사와 현재 남아 있는 흔적을 자세히 적어주세요.")
                 pin_image = st.file_uploader("현장 사진 첨부 (선택)", type=["png", "jpg", "jpeg"], key="pin_img_uploader")
 
-                pin_submitted = st.form_submit_button("📌 이 위치에 핀 추가하기", type="primary")
+                pin_submitted = st.form_submit_button("📌 지도에 핀 추가하기", type="primary")
                 if pin_submitted:
                     if not pin_name or not pin_summary or not pin_detail:
                         st.warning("장소 이름, 한 줄 요약, 상세 설명을 모두 입력해 주세요.")
@@ -733,8 +710,8 @@ if st.session_state.is_admin:
                             new_pin = {
                                 "id": f"loc_{datetime.now().strftime('%Y%m%d%H%M%S')}",
                                 "name": pin_name,
-                                "lat": float(st.session_state.picked_lat),
-                                "lon": float(st.session_state.picked_lon),
+                                "lat": float(pin_lat),
+                                "lon": float(pin_lon),
                                 "period": pin_period,
                                 "summary": pin_summary,
                                 "detail": pin_detail,
